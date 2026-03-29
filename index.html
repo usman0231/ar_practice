@@ -3,12 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Project</title>
+  <title>AR Test</title>
 
-  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-
-  <!-- AR.js -->
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
 
@@ -16,20 +13,13 @@
 
   <a-scene embedded arjs>
 
-    <!-- Marker -->
     <a-marker preset="hiro">
 
-      <!-- Your 3D Model -->
-      <a-entity 
-        gltf-model="./source/low_poly_car_-_chevrolet_c10_pickup_1963.glb"
-        position="0 0.5 0"
-        scale="0.5 0.5 0.5"
-        rotation="0 180 0">
-      </a-entity>
+      <!-- TEST OBJECT -->
+      <a-box position="0 0.5 0" color="red"></a-box>
 
     </a-marker>
 
-    <!-- Camera -->
     <a-entity camera></a-entity>
 
   </a-scene>
