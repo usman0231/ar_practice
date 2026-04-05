@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR Project</title>
+
+  <!-- Model Viewer -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    model-viewer {
+      width: 100vw;
+      height: 100vh;
+      --poster-color: #000;
+    }
+
+    /* Loading overlay */
+    #loading-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    #loading-overlay.hidden {
+      display: none;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* AR instructions toast */
+    #ar-instructions {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      z-index: 999;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    #ar-instructions.show {
+      opacity: 1;
+    }
+
+    /* Manual AR button fallback */
+    #ar-button {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 28px;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+      cursor: pointer;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    #ar-button:active {
+      background: #3367d6;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div>Loading model...</div>
+  </div>
+
+  <div id="ar-instructions">Pinch to resize &bull; Drag to move</div>
+
+  <button id="ar-button">View in AR</button>
+
+  <model-viewer
+    id="viewer"
+    src="./source/b.glb"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    ar-scale="adjustable"
+    ar-placement="floor"
+    camera-controls
+    touch-action="pan-y"
+    auto-rotate
+    shadow-intensity="1"
+    environment-image="neutral"
+    exposure="1"
+    camera-orbit="45deg 60deg 300%"
+    min-camera-orbit="auto auto 100%"
+    max-camera-orbit="auto auto 600%"
+    alt="3D Car Model"
+    interaction-prompt="none"
+    scale="0.01 0.01 0.01"
+  ></model-viewer>
+
+  <script type="module">
+    const viewer = document.getElementById('viewer');
+    const overlay = document.getElementById('loading-overlay');
+    const arButton = document.getElementById('ar-button');
+    const instructions = document.getElementById('ar-instructions');
+
+    // Hide loading once model is ready
+    viewer.addEventListener('load', () => {
+      overlay.classList.add('hidden');
+      tryAutoAR();
+    });
+
+    // Auto-launch AR when model is loaded
+    async function tryAutoAR() {
+      // Small delay to ensure viewer is fully initialized
+      await new Promise(r => setTimeout(r, 500));
+
+      if (viewer.canActivateAR) {
+        try {
+          await viewer.activateAR();
+        } catch (e) {
+          console.warn('Auto AR launch failed, showing button:', e);
+          showARButton();
+        }
+      } else {
+        showARButton();
+      }
+    }
+
+    // Show manual AR button if auto-launch fails
+    function showARButton() {
+      arButton.style.display = 'block';
+      arButton.addEventListener('click', async () => {
+        if (viewer.canActivateAR) {
+          await viewer.activateAR();
+        } else {
+          alert('AR is not supported on this device/browser. Use Chrome on Android or Safari on iOS.');
+        }
+      });
+    }
+
+    // Show instructions when AR session starts
+    viewer.addEventListener('ar-status', (e) => {
+      if (e.detail.status === 'session-started') {
+        instructions.classList.add('show');
+        arButton.style.display = 'none';
+        // Hide instructions after 4 seconds
+        setTimeout(() => instructions.classList.remove('show'), 4000);
+      } else if (e.detail.status === 'not-presenting') {
+        instructions.classList.remove('show');
+        showARButton();
+      }
+    });
+
+    // When object is placed on floor in AR
+    viewer.addEventListener('ar-tracking', (e) => {
+      console.log('AR tracking:', e.detail.status);
+    });
+  </script>
+
+</body>
+</html>
