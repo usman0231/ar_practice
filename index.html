@@ -118,7 +118,7 @@
     src="./source/low_poly_car_-_chevrolet_c10_pickup_1963.glb"
     ar
     ar-modes="webxr scene-viewer quick-look"
-    ar-scale="fixed"
+    ar-scale="adjustable"
     ar-placement="floor"
     camera-controls
     touch-action="pan-y"
@@ -126,7 +126,9 @@
     shadow-intensity="1"
     environment-image="neutral"
     exposure="1"
-    camera-orbit="45deg 60deg auto"
+    camera-orbit="45deg 60deg 105%"
+    min-camera-orbit="auto auto 50%"
+    max-camera-orbit="auto auto 300%"
     alt="3D Car Model"
     interaction-prompt="none"
     scale="0.01 0.01 0.01"
